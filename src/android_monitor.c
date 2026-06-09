@@ -36,12 +36,12 @@
 static GLFWvidmode getVideoMode(void)
 {
     GLFWvidmode mode;
-    mode.width = 1920;
-    mode.height = 1080;
+    mode.width = _glfw.android.renderspec->disp_width;
+    mode.height = _glfw.android.renderspec->disp_height;
     mode.redBits = 8;
     mode.greenBits = 8;
     mode.blueBits = 8;
-    mode.refreshRate = 60;
+    mode.refreshRate = _glfw.android.renderspec->disp_hz;
     return mode;
 }
 

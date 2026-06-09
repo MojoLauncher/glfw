@@ -85,6 +85,9 @@ typedef struct {
     int force_gles_context;
     int override_major_version;
     bool force_recreate_on_resize;
+    int disp_width;
+    int disp_height;
+    int disp_hz;
 } pojavexec_renderspec_t;
 
 

@@ -140,8 +140,6 @@ void* _glfwLoadEglAndroid(void) {
 
 int _glfwInitAndroid(void)
 {
-    _glfwPollMonitorsAndroid();
-
     void* pojavexec_handle = _glfwPlatformLoadModule("libpojavexec.so");
     if(!pojavexec_handle) {
         _glfwInputError(GLFW_PLATFORM_ERROR, "Failed to load platform support library");
@@ -155,6 +153,8 @@ int _glfwInitAndroid(void)
             _glfwPlatformGetModuleSymbol(_glfw.android.pojavexec_handle, "pojavexec_getRenderSpec");
 
     _glfw.android.renderspec = getRenderspec();
+
+    _glfwPollMonitorsAndroid();
 
     return android_init_window();
 }
