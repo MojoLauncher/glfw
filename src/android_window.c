@@ -814,7 +814,7 @@ void _glfwPollEventsAndroid(void)
     process_flag_bits();
     _input_queue_dequeue(&input_queue, android_dequeue_event);
 
-    if(surfaceOwner->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
+    if((surfaceOwner->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE || ownedByVulkan) && surfaceUpdated) {
         updateNativeWindowDimensions(surfaceOwner);
     }
 }
