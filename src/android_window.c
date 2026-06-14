@@ -793,13 +793,18 @@ GLFWbool _glfwWindowVisibleAndroid(_GLFWwindow* window)
     return window->android.visible;
 }
 
+void updateNativeWindowDimensions(_GLFWwindow * window);
+
 void _glfwPollEventsAndroid(void)
 {
     process_flag_bits();
     _input_queue_dequeue(&input_queue, android_dequeue_event);
-    _GLFWwindow* window = _glfw.android.focusedWindow;
-    _glfwInputWindowSize(window, window->android.width , window->android.height);
-    _glfwInputFramebufferSize(window, window->android.width, window->android.height);
+
+    _GLFWwindow * window = _glfw.android.focusedWindow;
+    if(!window) return;
+    if(window->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
+        updateNativeWindowDimensions(window);
+    }
 }
 
 static inline void poll_with_flags() {
@@ -1023,6 +1028,9 @@ void updateNativeWindowDimensions(_GLFWwindow* window) {
     window->android.width = width;
     window->android.height = height;
     surfaceUpdated = false;
+
+    _glfwInputWindowSize(window, width, height);
+    _glfwInputFramebufferSize(window, width, height);
 }
 
 // Select a new EGLSurface
@@ -1047,9 +1055,6 @@ EGLSurface _glfwManageEglSurfaceAndroid(_GLFWwindow* window) {
             surfaceInUse = false;
         }
     } else {
-        if(currentMode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
-            updateNativeWindowDimensions(window);
-        }
         return window->context.egl.surface;
     }
 
