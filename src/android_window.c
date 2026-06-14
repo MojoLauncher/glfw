@@ -814,9 +814,8 @@ void _glfwPollEventsAndroid(void)
     process_flag_bits();
     _input_queue_dequeue(&input_queue, android_dequeue_event);
 
-    _GLFWwindow * window = _glfw.android.focusedWindow;
-    if(window->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
-        updateNativeWindowDimensions(window);
+    if(surfaceOwner->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
+        updateNativeWindowDimensions(surfaceOwner);
     }
 }
 
