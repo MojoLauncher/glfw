@@ -793,7 +793,21 @@ GLFWbool _glfwWindowVisibleAndroid(_GLFWwindow* window)
     return window->android.visible;
 }
 
-void updateNativeWindowDimensions(_GLFWwindow * window);
+void updateNativeWindowDimensions(_GLFWwindow* window) {
+    // This is incredibly cringe, but...
+    // When we set W/H in the buffer geometry to 0,0, we reset the ANW to its default dimensions
+    // Therefore, we also don't change its dimensions (which breaks vulkan swapchains)
+    ANativeWindow_setBuffersGeometry(nativeWindow, 0, 0, window->android.visualId);
+    int width = ANativeWindow_getWidth(nativeWindow);
+    int height = ANativeWindow_getHeight(nativeWindow);
+    LOGI("Update window dimensions: %i %i", width, height);
+    window->android.width = width;
+    window->android.height = height;
+    surfaceUpdated = false;
+
+    _glfwInputWindowSize(window, width, height);
+    _glfwInputFramebufferSize(window, width, height);
+}
 
 void _glfwPollEventsAndroid(void)
 {
@@ -801,7 +815,6 @@ void _glfwPollEventsAndroid(void)
     _input_queue_dequeue(&input_queue, android_dequeue_event);
 
     _GLFWwindow * window = _glfw.android.focusedWindow;
-    if(!window) return;
     if(window->android.mode == GLFW_ANDROID_WINDOW_MODE_SURFACE && surfaceUpdated) {
         updateNativeWindowDimensions(window);
     }
@@ -1015,22 +1028,6 @@ void _glfwSetIMEStatusAndroid(_GLFWwindow* window, int active)
 int _glfwGetIMEStatusAndroid(_GLFWwindow* window)
 {
     return GLFW_FALSE;
-}
-
-void updateNativeWindowDimensions(_GLFWwindow* window) {
-    // This is incredibly cringe, but...
-    // When we set W/H in the buffer geometry to 0,0, we reset the ANW to its default dimensions
-    // Therefore, we also don't change its dimensions (which breaks vulkan swapchains)
-    ANativeWindow_setBuffersGeometry(nativeWindow, 0, 0, window->android.visualId);
-    int width = ANativeWindow_getWidth(nativeWindow);
-    int height = ANativeWindow_getHeight(nativeWindow);
-    LOGI("Update window dimensions: %i %i", width, height);
-    window->android.width = width;
-    window->android.height = height;
-    surfaceUpdated = false;
-
-    _glfwInputWindowSize(window, width, height);
-    _glfwInputFramebufferSize(window, width, height);
 }
 
 // Select a new EGLSurface
