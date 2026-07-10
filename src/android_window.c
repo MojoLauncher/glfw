@@ -65,6 +65,7 @@ static _Atomic GLFWbool surfaceDestroyed = true;
 static _Atomic GLFWbool surfaceUpdated = false;
 static _Atomic GLFWbool ownedByVulkan = false;
 static _Atomic GLFWbool surfaceInUse = false;
+static _Atomic VkSurfaceKHR vulkanSurface = 0;
 static struct ANativeWindow* nativeWindow = NULL;
 static _Atomic uint32_t update_flags = 0;
 
@@ -1258,6 +1259,7 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
                                       const VkAllocationCallbacks* allocator,
                                       VkSurfaceKHR* surface)
 {
+    fprintf(stderr, "Is window owned by Vulkan: %d\n", ownedByVulkan);
     VkResult err;
     VkAndroidSurfaceCreateInfoKHR sci;
     PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR;
@@ -1270,8 +1272,6 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
                         "Android: Vulkan instance missing VK_KHR_android_surface extension");
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
-
-    ownedByVulkan = true;
 
     // Wait for a new window to become available
     if(nativeWindow == NULL) {
@@ -1289,13 +1289,19 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
     sci.window = nativeWindow;
 
     err = vkCreateAndroidSurfaceKHR(instance, &sci, allocator, surface);
+    if(err == VK_ERROR_NATIVE_WINDOW_IN_USE_KHR && ownedByVulkan && vulkanSurface){
+        fprintf(stderr, "Surface already exists, surf=%llu\n", vulkanSurface);
+        *surface = vulkanSurface;
+        return VK_SUCCESS;
+    }
     if (err)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "Android: Failed to create Vulkan surface: %s",
                         _glfwGetVulkanResultString(err));
     }
-
+    ownedByVulkan = true;
+    vulkanSurface = *surface;
     return err;
 }
 
