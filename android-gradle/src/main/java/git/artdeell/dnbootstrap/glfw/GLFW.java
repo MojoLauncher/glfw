@@ -2,7 +2,6 @@ package git.artdeell.dnbootstrap.glfw;
 
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.view.KeyCharacterMap;
 import android.view.Surface;
 
 import java.lang.ref.WeakReference;
