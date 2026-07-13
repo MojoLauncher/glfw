@@ -2,6 +2,7 @@ package git.artdeell.dnbootstrap.glfw;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.view.KeyCharacterMap;
 import android.view.Surface;
 
 import java.lang.ref.WeakReference;
@@ -16,6 +17,7 @@ import git.artdeell.dnbootstrap.utils.Utils;
 
 public class GLFW {
     private static final Set<GrabListener> grabListeners = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static WeakReference<CursorImplementor> cursorImpl;
     private static WeakReference<ClipboardProvider> clipboardImpl;
     private static WeakReference<GamepadEnableHandler> gamepadEnable;
@@ -113,6 +115,11 @@ public class GLFW {
         ClipboardProvider clipboardProvider = Utils.getWeakReference(clipboardImpl);
         if(clipboardProvider == null) return null;
         return clipboardProvider.getClipboardString();
+    }
+
+    @SuppressWarnings("unused") // Used from native
+    public static char getScancodeLabel(int keycode){
+        return kcm.getDisplayLabel(keycode);
     }
 
     @SuppressWarnings("unused") // Used from native

@@ -90,6 +90,7 @@ static struct {
     jmethodID method_getClipboardString;
     jmethodID method_setClipboardString;
     jmethodID method_enableDirectGamepad;
+    jmethodID method_getScancodeLabel;
 } jni;
 
 static _Thread_local struct {
@@ -1108,10 +1109,16 @@ const char* _glfwGetScancodeNameAndroid(int scancode)
         _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode %i", scancode);
         return NULL;
     }
-
-    // TODO: query KeyCharacterMap for the keycode display labels
-
-    return NULL;
+    if(_glfw.android.keynames[scancode][0]) return _glfw.android.keynames[scancode];
+    jchar label = (*jni_tl.env)->CallStaticCharMethod(jni_tl.env, jni.glfw_class, jni.method_getScancodeLabel, scancode);
+    // jchar is 16-bit
+    if(label < 128){
+        _glfw.android.keynames[scancode][0] = (char) label;
+        _glfw.android.keynames[scancode][1] = '\0';
+    } else {
+        _glfwEncodeUTF8(_glfw.android.keynames[scancode], label);
+    }
+    return _glfw.android.keynames[scancode];
 }
 
 int _glfwGetKeyScancodeAndroid(int key)
@@ -1360,6 +1367,7 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_initialize(JNIEnv *env, jclass clazz) {
     jni.method_getClipboardString = (*env)->GetStaticMethodID(env, clazz, "getClipboardString", "()Ljava/lang/String;");
     jni.method_setClipboardString = (*env)->GetStaticMethodID(env, clazz, "setClipboardString", "(Ljava/lang/String;)V");
     jni.method_enableDirectGamepad = (*env)->GetStaticMethodID(env, clazz, "enableDirectGamepad", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)V");
+    jni.method_getScancodeLabel = (*env)->GetStaticMethodID(env, clazz, "getScancodeLabel", "(I)C");
 }
 
 JNIEXPORT void JNICALL
