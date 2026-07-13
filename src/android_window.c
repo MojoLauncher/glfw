@@ -90,7 +90,6 @@ static struct {
     jmethodID method_getClipboardString;
     jmethodID method_setClipboardString;
     jmethodID method_enableDirectGamepad;
-    jmethodID method_getScancodeLabel;
 } jni;
 
 static _Thread_local struct {
@@ -1104,21 +1103,112 @@ GLFWbool _glfwSwapBuffersAttentionEglAndroid(_GLFWwindow* window) {
 
 const char* _glfwGetScancodeNameAndroid(int scancode)
 {
-    if (scancode > AKEYCODE_MACRO_4)
-    {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode %i", scancode);
-        return NULL;
+    int sc = translate_android_key(scancode);
+    switch (sc == -1 ? scancode : sc) {
+        case GLFW_KEY_SPACE: return "Space";
+        case GLFW_KEY_APOSTROPHE: return "'";
+        case GLFW_KEY_COMMA: return ",";
+        case GLFW_KEY_MINUS: return "-";
+        case GLFW_KEY_PERIOD: return ".";
+        case GLFW_KEY_SLASH: return "/";
+        case GLFW_KEY_0: return "0";
+        case GLFW_KEY_1: return "1";
+        case GLFW_KEY_2: return "2";
+        case GLFW_KEY_3: return "3";
+        case GLFW_KEY_4: return "4";
+        case GLFW_KEY_5: return "5";
+        case GLFW_KEY_6: return "6";
+        case GLFW_KEY_7: return "7";
+        case GLFW_KEY_8: return "8";
+        case GLFW_KEY_9: return "9";
+        case GLFW_KEY_SEMICOLON: return ";";
+        case GLFW_KEY_EQUAL: return "=";
+        case GLFW_KEY_A: return "A";
+        case GLFW_KEY_B: return "B";
+        case GLFW_KEY_C: return "C";
+        case GLFW_KEY_D: return "D";
+        case GLFW_KEY_E: return "E";
+        case GLFW_KEY_F: return "F";
+        case GLFW_KEY_G: return "G";
+        case GLFW_KEY_H: return "H";
+        case GLFW_KEY_I: return "I";
+        case GLFW_KEY_J: return "J";
+        case GLFW_KEY_K: return "K";
+        case GLFW_KEY_L: return "L";
+        case GLFW_KEY_M: return "M";
+        case GLFW_KEY_N: return "N";
+        case GLFW_KEY_O: return "O";
+        case GLFW_KEY_P: return "P";
+        case GLFW_KEY_Q: return "Q";
+        case GLFW_KEY_R: return "R";
+        case GLFW_KEY_S: return "S";
+        case GLFW_KEY_T: return "T";
+        case GLFW_KEY_U: return "U";
+        case GLFW_KEY_V: return "V";
+        case GLFW_KEY_W: return "W";
+        case GLFW_KEY_X: return "X";
+        case GLFW_KEY_Y: return "Y";
+        case GLFW_KEY_Z: return "Z";
+        case GLFW_KEY_LEFT_BRACKET: return "[";
+        case GLFW_KEY_BACKSLASH: return "\\";
+        case GLFW_KEY_RIGHT_BRACKET: return "]";
+        case GLFW_KEY_GRAVE_ACCENT: return "`";
+        case GLFW_KEY_ESCAPE: return "ESC";
+        case GLFW_KEY_ENTER: return "Enter";
+        case GLFW_KEY_TAB: return "Tab";
+        case GLFW_KEY_BACKSPACE: return "Backspace";
+        case GLFW_KEY_INSERT: return "Insert";
+        case GLFW_KEY_DELETE: return "Delete";
+        case GLFW_KEY_RIGHT: return "Right";
+        case GLFW_KEY_LEFT: return "Left";
+        case GLFW_KEY_UP: return "Up";
+        case GLFW_KEY_DOWN: return "Down";
+        case GLFW_KEY_PAGE_UP: return "PageUp";
+        case GLFW_KEY_PAGE_DOWN: return "PageDown";
+        case GLFW_KEY_HOME: return "Home";
+        case GLFW_KEY_END: return "End";
+        case GLFW_KEY_CAPS_LOCK: return "CapsLock";
+        case GLFW_KEY_SCROLL_LOCK: return "ScrollLock";
+        case GLFW_KEY_NUM_LOCK: return "NumLock";
+        case GLFW_KEY_PRINT_SCREEN: return "PrintScreen";
+        case GLFW_KEY_PAUSE: return "Pause";
+        case GLFW_KEY_F1: return "F1";
+        case GLFW_KEY_F2: return "F2";
+        case GLFW_KEY_F3: return "F3";
+        case GLFW_KEY_F4: return "F4";
+        case GLFW_KEY_F5: return "F5";
+        case GLFW_KEY_F6: return "F6";
+        case GLFW_KEY_F7: return "F7";
+        case GLFW_KEY_F8: return "F8";
+        case GLFW_KEY_F9: return "F9";
+        case GLFW_KEY_F10: return "F10";
+        case GLFW_KEY_F11: return "F11";
+        case GLFW_KEY_F12: return "F12";
+        case GLFW_KEY_KP_0: return "0";
+        case GLFW_KEY_KP_1: return "1";
+        case GLFW_KEY_KP_2: return "2";
+        case GLFW_KEY_KP_3: return "3";
+        case GLFW_KEY_KP_4: return "4";
+        case GLFW_KEY_KP_5: return "5";
+        case GLFW_KEY_KP_6: return "6";
+        case GLFW_KEY_KP_7: return "7";
+        case GLFW_KEY_KP_8: return "8";
+        case GLFW_KEY_KP_9: return "9";
+        case GLFW_KEY_KP_DECIMAL: return ".";
+        case GLFW_KEY_KP_DIVIDE: return "/";
+        case GLFW_KEY_KP_SUBTRACT: return "-";
+        case GLFW_KEY_KP_ADD: return "+";
+        case GLFW_KEY_KP_ENTER: return "Enter";
+        case GLFW_KEY_KP_EQUAL: return "=";
+        case GLFW_KEY_LEFT_SHIFT: return "Shift";
+        case GLFW_KEY_LEFT_CONTROL: return "Control";
+        case GLFW_KEY_LEFT_ALT: return "Alt";
+        case GLFW_KEY_RIGHT_SHIFT: return "RShift";
+        case GLFW_KEY_RIGHT_CONTROL: return "RControl";
+        case GLFW_KEY_RIGHT_ALT: return "Alt-R";
+        default:
+            return NULL;
     }
-    if(_glfw.android.keynames[scancode][0]) return _glfw.android.keynames[scancode];
-    jchar label = (*jni_tl.env)->CallStaticCharMethod(jni_tl.env, jni.glfw_class, jni.method_getScancodeLabel, scancode);
-    // jchar is 16-bit
-    if(label < 128){
-        _glfw.android.keynames[scancode][0] = (char) label;
-        _glfw.android.keynames[scancode][1] = '\0';
-    } else {
-        _glfwEncodeUTF8(_glfw.android.keynames[scancode], label);
-    }
-    return _glfw.android.keynames[scancode];
 }
 
 int _glfwGetKeyScancodeAndroid(int key)
@@ -1367,7 +1457,6 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_initialize(JNIEnv *env, jclass clazz) {
     jni.method_getClipboardString = (*env)->GetStaticMethodID(env, clazz, "getClipboardString", "()Ljava/lang/String;");
     jni.method_setClipboardString = (*env)->GetStaticMethodID(env, clazz, "setClipboardString", "(Ljava/lang/String;)V");
     jni.method_enableDirectGamepad = (*env)->GetStaticMethodID(env, clazz, "enableDirectGamepad", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)V");
-    jni.method_getScancodeLabel = (*env)->GetStaticMethodID(env, clazz, "getScancodeLabel", "(I)C");
 }
 
 JNIEXPORT void JNICALL

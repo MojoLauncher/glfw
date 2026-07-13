@@ -118,6 +118,7 @@ typedef struct _GLFWmonitorAndroid
     GLFWgammaramp   ramp;
 } _GLFWmonitorAndroid;
 
+
 // Android-specific global data
 //
 typedef struct _GLFWlibraryAndroid
@@ -127,7 +128,6 @@ typedef struct _GLFWlibraryAndroid
     _GLFWwindow*    focusedWindow;
     void* pojavexec_handle;
     const pojavexec_renderspec_t* renderspec;
-    char keynames[GLFW_KEY_LAST][sizeof(jchar)];
 } _GLFWlibraryAndroid;
 
 typedef struct _GLFWcursorAndroid
