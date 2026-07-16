@@ -118,7 +118,6 @@ typedef struct _GLFWmonitorAndroid
     GLFWgammaramp   ramp;
 } _GLFWmonitorAndroid;
 
-
 // Android-specific global data
 //
 typedef struct _GLFWlibraryAndroid
