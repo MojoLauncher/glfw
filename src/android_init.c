@@ -124,6 +124,7 @@ GLFWbool _glfwConnectAndroid(int platformID, _GLFWplatform* platform)
 
 extern GLFWbool android_init_window(void);
 extern void android_destroy_window(void);
+extern void android_notify_init();
 
 void* _glfwLoadVulkanDriverAndroid(void) {
 
@@ -136,8 +137,9 @@ void* _glfwLoadEglAndroid(void) {
 
 int _glfwInitAndroid(void)
 {
-    _glfwPollMonitorsAndroid();
 
+    _glfwPollMonitorsAndroid();
+    android_notify_init();
     return android_init_window();
 }
 

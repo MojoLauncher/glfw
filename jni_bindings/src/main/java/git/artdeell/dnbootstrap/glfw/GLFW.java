@@ -16,6 +16,7 @@ import git.artdeell.dnbootstrap.utils.Utils;
 
 public class GLFW {
     private static final Set<GrabListener> grabListeners = Collections.newSetFromMap(new WeakHashMap<>());
+    private static Runnable onInitCallback;
     private static WeakReference<CursorImplementor> cursorImpl;
     private static WeakReference<ClipboardProvider> clipboardImpl;
     private static WeakReference<GamepadEnableHandler> gamepadEnable;
@@ -29,6 +30,8 @@ public class GLFW {
         System.loadLibrary("glfw");
         GLFW.initialize();
     }
+
+
 
     public static void setCursorImpl(CursorImplementor cursorImpl) {
         GLFW.cursorImpl = new WeakReference<>(cursorImpl);
@@ -138,6 +141,13 @@ public class GLFW {
 
     public static void sendKeyEvent(int glfwCode, boolean state, int mods) {
         sendKeyEvent(glfwCode, state ? 1 : 0, mods);
+    }
+
+    public static void receiveInit() {
+        onInitCallback.run();
+    }
+    public static void setInitCallback(Runnable callback){
+        onInitCallback = callback;
     }
 
     public static native void initialize();

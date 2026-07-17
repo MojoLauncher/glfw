@@ -91,6 +91,7 @@ static struct {
     jmethodID method_getClipboardString;
     jmethodID method_setClipboardString;
     jmethodID method_enableDirectGamepad;
+    jmethodID method_receiveInit;
 } jni;
 
 static _Thread_local struct {
@@ -1300,6 +1301,11 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
     return err;
 }
 
+void android_notify_init(){
+    ensure_comm_connected();
+    (*jni_tl.env)->CallStaticVoidMethod(jni_tl.env, jni.glfw_class, jni.method_receiveInit);
+}
+
 
 JNIEXPORT void JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSurfaceCreated(JNIEnv *env, jclass clazz,
@@ -1361,6 +1367,7 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_initialize(JNIEnv *env, jclass clazz) {
     jni.method_getClipboardString = (*env)->GetStaticMethodID(env, clazz, "getClipboardString", "()Ljava/lang/String;");
     jni.method_setClipboardString = (*env)->GetStaticMethodID(env, clazz, "setClipboardString", "(Ljava/lang/String;)V");
     jni.method_enableDirectGamepad = (*env)->GetStaticMethodID(env, clazz, "enableDirectGamepad", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)V");
+    jni.method_receiveInit = (*env)->GetStaticMethodID(env, clazz, "receiveInit", "()V");
 }
 
 JNIEXPORT void JNICALL
