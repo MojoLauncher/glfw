@@ -8,21 +8,22 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 import git.artdeell.dnbootstrap.utils.Utils;
 
 public class GLFW {
-    private static final Set<GrabListener> grabListeners = Collections.newSetFromMap(new WeakHashMap<>());
+    public interface PosCallback {
+        void receive(double x, double y);
+    }
+    public interface CursorCallback {
+        void onCursorUse(GLFWCursor cursor);
+    }
+    private static GrabListener mGrabListener;
     private static Runnable onInitCallback;
-    private static WeakReference<CursorImplementor> cursorImpl;
-    private static WeakReference<ClipboardProvider> clipboardImpl;
-    private static WeakReference<GamepadEnableHandler> gamepadEnable;
-    private static boolean grabbing = false;
-    private static GLFWCursor cursor;
-    public static double cursorX = 0.5, cursorY = 0.5;
+    private static PosCallback mPositionCallback;
+    private static CursorCallback mCursorCallback;
+    private static GamepadEnableHandler gamepadEnabler;
+    private static GLFWClipboard mClipboardImpl;
     public static ByteBuffer gamepadButtonBuffer;
     public static FloatBuffer gamepadAxisBuffer;
 
@@ -31,65 +32,35 @@ public class GLFW {
         GLFW.initialize();
     }
 
-
-
-    public static void setCursorImpl(CursorImplementor cursorImpl) {
-        GLFW.cursorImpl = new WeakReference<>(cursorImpl);
-        addGrabListener(cursorImpl);
-    }
-
-    public static void setClipboardImpl(ClipboardProvider clipboardImpl) {
-        GLFW.clipboardImpl = new WeakReference<>(clipboardImpl);
-    }
-
     public static void setGamepadEnableHandler(GamepadEnableHandler handler) {
-        GLFW.gamepadEnable = new WeakReference<>(handler);
+        GLFW.gamepadEnabler = handler;
     }
 
-    public static void addGrabListener(GrabListener grabListener) {
-        grabListeners.add(grabListener);
+    public static void setGrabListener(GrabListener grabListener) {
+        mGrabListener = grabListener;
     }
 
-    public static boolean isGrabbing() {
-        return grabbing;
+    public static void setClipboardImpl(GLFWClipboard mClipboardImpl) {
+        GLFW.mClipboardImpl = mClipboardImpl;
     }
-
-    public static GLFWCursor getCursor() {
-        return cursor;
+    public static void setPositionCallback(PosCallback callback){
+        mPositionCallback = callback;
     }
-
-    public static void sendMousePos() {
-        if(!grabbing) {
-            if(cursorX < 0) cursorX = 0;
-            else if(cursorX > 1) cursorX = 1;
-            if(cursorY < 0) cursorY = 0;
-            else if(cursorY > 1) cursorY = 1;
-        }
-        CursorImplementor cursor = Utils.getWeakReference(GLFW.cursorImpl);
-        if(cursor != null) cursor.onCursorPosition();
-        sendMousePosition0(cursorX, cursorY);
+    public static void setCursorCallback(CursorCallback callback){
+        mCursorCallback = callback;
+    }
+    public static void setInitCallback(Runnable callback){
+        onInitCallback = callback;
     }
 
     @SuppressWarnings("unused") // Used from native
     private static void receiveGrabState(boolean isGrabbing) {
-        boolean wasGrabbing = GLFW.grabbing;
-        GLFW.grabbing = isGrabbing;
-        Utils.runOnUiThread(() -> {
-            for(GrabListener grabListener : grabListeners) grabListener.onGrabState(isGrabbing);
-        });
-        if(!isGrabbing && wasGrabbing) {
-            cursorX = cursorY = 0.5;
-            sendMousePos();
-        }
-
+        mGrabListener.onGrabState(isGrabbing);
     }
 
     @SuppressWarnings("unused") // Used from native
     private static void receiveCursorPos(double x, double y) {
-        cursorX = x;
-        cursorY = y;
-        CursorImplementor cursor = Utils.getWeakReference(GLFW.cursorImpl);
-        if(cursor != null) cursor.onCursorPosition();
+        mPositionCallback.receive(x, y);
     }
 
     @SuppressWarnings("unused") // Used from native
@@ -106,23 +77,17 @@ public class GLFW {
 
     @SuppressWarnings("unused") // Used from native
     private static void useCursor(GLFWCursor glfwCursor) {
-        GLFW.cursor = glfwCursor;
-        CursorImplementor cursor = Utils.getWeakReference(GLFW.cursorImpl);
-        if(cursor != null) cursor.onCursorChanged();
+        mCursorCallback.onCursorUse(glfwCursor);
     }
 
     @SuppressWarnings("unused") // Used from native
     private static String getClipboardString() {
-        ClipboardProvider clipboardProvider = Utils.getWeakReference(clipboardImpl);
-        if(clipboardProvider == null) return null;
-        return clipboardProvider.getClipboardString();
+        return mClipboardImpl.getClipboardString();
     }
 
     @SuppressWarnings("unused") // Used from native
     private static void setClipboardString(String str) {
-        ClipboardProvider clipboardProvider = Utils.getWeakReference(clipboardImpl);
-        if(clipboardProvider == null) return;
-        clipboardProvider.setClipboardString(str);
+        mClipboardImpl.setClipboardString(str);
     }
 
     @SuppressWarnings("unused") // Used from native
@@ -135,23 +100,15 @@ public class GLFW {
         }
         gamepadAxisBuffer = axisFloatBuffer;
         gamepadButtonBuffer = buttonBuffer;
-        GamepadEnableHandler enableHandler = Utils.getWeakReference(gamepadEnable);
-        if(enableHandler != null) enableHandler.onEnableGamepad();
+        gamepadEnabler.onEnableGamepad();
     }
 
-    public static void sendKeyEvent(int glfwCode, boolean state, int mods) {
-        sendKeyEvent(glfwCode, state ? 1 : 0, mods);
-    }
-
+    @SuppressWarnings("unused") // Used from native
     public static void receiveInit() {
         onInitCallback.run();
     }
-    public static void setInitCallback(Runnable callback){
-        onInitCallback = callback;
-    }
-
     public static native void initialize();
-    private static native void sendMousePosition0(double x, double y);
+    public static native void sendMousePosition0(double x, double y);
     public static native void sendKeyEvent(int glfwCode, int state, int mods);
     public static native void sendRawKeyEvent(int androidCode, int state, int mods, char codepoint);
     public static native void sendMouseEvent(int glfwMouseKey, int state, int mods);
