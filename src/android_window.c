@@ -78,10 +78,6 @@ static pthread_mutex_t nw_vulkan_mutex;
 static pthread_cond_t nw_vulkan_cond;
 
 static struct {
-    double x, y;
-} cursor_unscaled;
-
-static struct {
     JavaVM *vm;
     jclass glfw_class;
     jmethodID method_receiveGrabState;
@@ -270,16 +266,8 @@ static inline void android_send_event(input_event_t *ev) {
     _input_queue_push(&input_queue, ev);
 }
 
-static void computeCursorPos() {
-    int width = surfaceOwner->android.width;
-    int height = surfaceOwner->android.height;
-    _glfw.android.xcursor = cursor_unscaled.x * width;
-    _glfw.android.ycursor = cursor_unscaled.y *  height;
-}
-
 static void push_flag_events() {
     if((update_flags & FLAG_MOUSE_POS) != 0) {
-        computeCursorPos();
         _glfwInputCursorPos(surfaceOwner, _glfw.android.xcursor, _glfw.android.ycursor);
     }
     update_flags = 0;
@@ -877,20 +865,11 @@ void _glfwGetCursorPosAndroid(_GLFWwindow* window, double* xpos, double* ypos)
 void _glfwSetCursorPosAndroid(_GLFWwindow* window, double x, double y)
 {
     ensure_comm_connected();
-    double scaled_cursor_x = x / window->android.width;
-    double scaled_cursor_y = y / window->android.height;
     (*jni_tl.env)->CallStaticVoidMethod(jni_tl.env, jni.glfw_class,
                                         jni.method_receiveCursorPos,
-                                        scaled_cursor_x, scaled_cursor_y);
-
-    cursor_unscaled.x = scaled_cursor_x;
-    cursor_unscaled.y = scaled_cursor_y;
-    if(window == surfaceOwner) {
-        _glfw.android.xcursor = x;
-        _glfw.android.ycursor = y;
-    } else {
-        computeCursorPos();
-    }
+                                        x, y);
+    _glfw.android.xcursor = x;
+    _glfw.android.ycursor = y;
 }
 
 void _glfwSetCursorModeAndroid(_GLFWwindow* window, int mode)
@@ -1349,9 +1328,8 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSurfaceDestroyed(JNIEnv *env,
 JNIEXPORT void JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_sendMousePosition0__DD(JNIEnv *env, jclass clazz,
                                                           jdouble v1, jdouble v2) {
-    if(cursor_unscaled.x == v1 && cursor_unscaled.y == v2) return;
-    cursor_unscaled.x = v1;
-    cursor_unscaled.y = v2;
+    _glfw.android.xcursor = v1;
+    _glfw.android.ycursor = v2;
     update_flags |= FLAG_MOUSE_POS;
     _input_queue_wait_unlock(&input_queue);
 }
