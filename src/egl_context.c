@@ -34,6 +34,7 @@
 
 #if defined(_GLFW_ANDROID)
 #include "android_egl_context_hook.h"
+#include "mojoexec.h"
 #endif
 
 // Return a description of the specified EGL error
@@ -882,6 +883,15 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
             if (window->context.egl.client)
                 break;
         }
+
+#if defined(_GLFW_ANDROID)
+        // As a last resort try getting client handle from MojoExec
+        // It might appear as a real client library
+        if(!window->context.egl.client){
+            window->context.egl.client = mojoexec_acq_egl_handle();
+            fprintf(stderr, "acquired client handle through mojoexec : %p\n", window->context.egl.client);
+        }
+#endif
 
         if (!window->context.egl.client)
         {
