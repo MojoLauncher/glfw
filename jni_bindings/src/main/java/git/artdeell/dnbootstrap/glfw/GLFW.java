@@ -27,6 +27,9 @@ public class GLFW {
     public static ByteBuffer gamepadButtonBuffer;
     public static FloatBuffer gamepadAxisBuffer;
 
+    public static final int GLFW_VISIBLE = 0x00020004;
+    public static final int GLFW_HOVERED = 0x0002000B;
+
     static {
         System.loadLibrary("glfw");
         GLFW.initialize();
