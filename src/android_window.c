@@ -1423,3 +1423,10 @@ void _glfwSendJoystickConnectEvent(void) {
     };
     android_send_event(&event);
 }
+
+JNIEXPORT void JNICALL
+Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSetWindowAttribs(JNIEnv *env, jclass clazz,
+                                                               jint attrib, jboolean value) {
+    if(!surfaceOwner) return;
+    glfwSetWindowAttrib((GLFWwindow *) surfaceOwner, attrib, value ? GLFW_TRUE : GLFW_FALSE);
+}

@@ -118,4 +118,5 @@ public class GLFW {
     public static native void nativeSurfaceDestroyed();
     public static native void nativeSurfaceUpdated();
     public static native void nativeNotifyGamepadConnected();
+    public static native void nativeSetWindowAttribs(int attrib, boolean value);
 }
