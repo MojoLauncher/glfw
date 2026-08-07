@@ -1383,6 +1383,7 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_sendRawKeyEvent(JNIEnv *env, jclass claz
             .k.codepoint = codepoint
     };
     android_send_event(&event);
+    return true;
 }
 
 JNIEXPORT void JNICALL
