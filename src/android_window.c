@@ -352,6 +352,7 @@ static int createNativeWindow(_GLFWwindow* window,
     window->android.maximized = wndconfig->maximized;
     window->android.floating = wndconfig->floating;
     window->android.transparent = fbconfig->transparent;
+    window->android.hovered = GLFW_TRUE;
     window->android.opacity = 1.f;
 
     return GLFW_TRUE;
@@ -679,7 +680,7 @@ GLFWbool _glfwWindowMaximizedAndroid(_GLFWwindow* window)
 
 GLFWbool _glfwWindowHoveredAndroid(_GLFWwindow* window)
 {
-    return GLFW_TRUE;
+    return window->android.hovered;
 }
 
 GLFWbool _glfwFramebufferTransparentAndroid(_GLFWwindow* window)
@@ -1428,5 +1429,16 @@ JNIEXPORT void JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSetWindowAttribs(JNIEnv *env, jclass clazz,
                                                                jint attrib, jboolean value) {
     if(!surfaceOwner) return;
-    glfwSetWindowAttrib((GLFWwindow *) surfaceOwner, attrib, value ? GLFW_TRUE : GLFW_FALSE);
+    switch(attrib){
+        case GLFW_HOVERED:
+            surfaceOwner->android.hovered = value ? GLFW_TRUE : GLFW_FALSE;
+            break;
+        case GLFW_VISIBLE:
+            if(value) _glfwShowWindowAndroid(surfaceOwner);
+            else _glfwHideWindowAndroid(surfaceOwner);
+            break;
+        default:
+            _glfwInputError(GLFW_INVALID_ENUM, "Unsupported window attribute");
+            break;
+    }
 }
