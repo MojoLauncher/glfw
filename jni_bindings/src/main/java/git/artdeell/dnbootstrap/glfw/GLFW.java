@@ -113,7 +113,7 @@ public class GLFW {
     public static native void initialize();
     public static native void sendMousePosition0(double x, double y);
     public static native void sendKeyEvent(int glfwCode, int state, int mods);
-    public static native void sendRawKeyEvent(int androidCode, int state, int mods, char codepoint);
+    public static native boolean sendRawKeyEvent(int androidCode, int state, int mods, char codepoint);
     public static native void sendMouseEvent(int glfwMouseKey, int state, int mods);
     public static native void sendBulkUnicodeEvent(String input, int mods);
     public static native void sendScrollEvent(double xoffset, double yoffset);
