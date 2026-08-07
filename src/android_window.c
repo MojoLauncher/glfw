@@ -728,6 +728,12 @@ GLFWbool _glfwRawMouseMotionSupportedAndroid(void)
 
 void _glfwShowWindowAndroid(_GLFWwindow* window)
 {
+    if(_glfw.android.focusedWindow == NULL)
+    {
+        _glfw.android.focusedWindow = window;
+        _glfwInputWindowFocus(window, GLFW_TRUE);
+    }
+
     window->android.visible = GLFW_TRUE;
 }
 
