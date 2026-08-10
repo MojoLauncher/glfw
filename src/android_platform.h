@@ -87,6 +87,7 @@ typedef struct _GLFWwindowAndroid
     int             width;
     int             height;
     GLFWbool        visible;
+    GLFWbool        hovered;
     GLFWbool        iconified;
     GLFWbool        maximized;
     GLFWbool        resizable;
