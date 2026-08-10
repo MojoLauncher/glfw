@@ -77,19 +77,6 @@ typedef void (APIENTRY *PFN_vkGetPhysicalDeviceQueueFamilyProperties)(VkPhysical
 
 typedef int32_t (*ANativeWindow_setBuffersTransform_t)(struct ANativeWindow *_Nonnull window,int32_t transform);
 
-typedef void* (*acquire_egl_handle_t)(const char*);
-
-typedef struct {
-    acquire_egl_handle_t egl_acquire;
-    const char* egl_path;
-    int force_gles_context;
-    int override_major_version;
-    bool force_recreate_on_resize;
-    int disp_width;
-    int disp_height;
-    int disp_hz;
-} pojavexec_renderspec_t;
-
 
 // Android-specific per-window data
 //
@@ -100,6 +87,7 @@ typedef struct _GLFWwindowAndroid
     int             width;
     int             height;
     GLFWbool        visible;
+    GLFWbool        hovered;
     GLFWbool        iconified;
     GLFWbool        maximized;
     GLFWbool        resizable;
@@ -125,8 +113,6 @@ typedef struct _GLFWlibraryAndroid
     double          xcursor;
     double          ycursor;
     _GLFWwindow*    focusedWindow;
-    void* pojavexec_handle;
-    const pojavexec_renderspec_t* renderspec;
 } _GLFWlibraryAndroid;
 
 typedef struct _GLFWcursorAndroid

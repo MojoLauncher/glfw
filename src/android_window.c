@@ -42,6 +42,7 @@
 #include <android/native_window.h>
 #include <math.h>
 #include <android/native_window_jni.h>
+#include <mojoexec.h>
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "android_window", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "android_window", __VA_ARGS__)
@@ -77,10 +78,6 @@ static pthread_mutex_t nw_vulkan_mutex;
 static pthread_cond_t nw_vulkan_cond;
 
 static struct {
-    double x, y;
-} cursor_unscaled;
-
-static struct {
     JavaVM *vm;
     jclass glfw_class;
     jmethodID method_receiveGrabState;
@@ -90,6 +87,7 @@ static struct {
     jmethodID method_getClipboardString;
     jmethodID method_setClipboardString;
     jmethodID method_enableDirectGamepad;
+    jmethodID method_receiveInit;
 } jni;
 
 static _Thread_local struct {
@@ -268,16 +266,8 @@ static inline void android_send_event(input_event_t *ev) {
     _input_queue_push(&input_queue, ev);
 }
 
-static void computeCursorPos() {
-    int width = surfaceOwner->android.width;
-    int height = surfaceOwner->android.height;
-    _glfw.android.xcursor = cursor_unscaled.x * width;
-    _glfw.android.ycursor = cursor_unscaled.y *  height;
-}
-
 static void push_flag_events() {
     if((update_flags & FLAG_MOUSE_POS) != 0) {
-        computeCursorPos();
         _glfwInputCursorPos(surfaceOwner, _glfw.android.xcursor, _glfw.android.ycursor);
     }
     update_flags = 0;
@@ -362,6 +352,7 @@ static int createNativeWindow(_GLFWwindow* window,
     window->android.maximized = wndconfig->maximized;
     window->android.floating = wndconfig->floating;
     window->android.transparent = fbconfig->transparent;
+    window->android.hovered = GLFW_TRUE;
     window->android.opacity = 1.f;
 
     return GLFW_TRUE;
@@ -399,9 +390,9 @@ static void android_reconfigure_context(const _GLFWctxconfig *ctxconfig, _GLFWct
     memcpy(target, ctxconfig, sizeof (_GLFWctxconfig));
     if(target->client == GLFW_NO_API) return;
 
-    if(_glfw.android.renderspec->force_gles_context) {
+    if(mojoexec_renderspec.force_gles_context) {
         target->client = GLFW_OPENGL_ES_API;
-        target->major = _glfw.android.renderspec->override_major_version;
+        target->major = mojoexec_renderspec.override_major_version;
         target->minor = 0;
     }
 }
@@ -689,7 +680,7 @@ GLFWbool _glfwWindowMaximizedAndroid(_GLFWwindow* window)
 
 GLFWbool _glfwWindowHoveredAndroid(_GLFWwindow* window)
 {
-    return GLFW_TRUE;
+    return window->android.hovered;
 }
 
 GLFWbool _glfwFramebufferTransparentAndroid(_GLFWwindow* window)
@@ -737,6 +728,12 @@ GLFWbool _glfwRawMouseMotionSupportedAndroid(void)
 
 void _glfwShowWindowAndroid(_GLFWwindow* window)
 {
+    if(_glfw.android.focusedWindow == NULL)
+    {
+        _glfw.android.focusedWindow = window;
+        _glfwInputWindowFocus(window, GLFW_TRUE);
+    }
+
     window->android.visible = GLFW_TRUE;
 }
 
@@ -874,20 +871,11 @@ void _glfwGetCursorPosAndroid(_GLFWwindow* window, double* xpos, double* ypos)
 void _glfwSetCursorPosAndroid(_GLFWwindow* window, double x, double y)
 {
     ensure_comm_connected();
-    double scaled_cursor_x = x / window->android.width;
-    double scaled_cursor_y = y / window->android.height;
     (*jni_tl.env)->CallStaticVoidMethod(jni_tl.env, jni.glfw_class,
                                         jni.method_receiveCursorPos,
-                                        scaled_cursor_x, scaled_cursor_y);
-
-    cursor_unscaled.x = scaled_cursor_x;
-    cursor_unscaled.y = scaled_cursor_y;
-    if(window == surfaceOwner) {
-        _glfw.android.xcursor = x;
-        _glfw.android.ycursor = y;
-    } else {
-        computeCursorPos();
-    }
+                                        x, y);
+    _glfw.android.xcursor = x;
+    _glfw.android.ycursor = y;
 }
 
 void _glfwSetCursorModeAndroid(_GLFWwindow* window, int mode)
@@ -1394,6 +1382,11 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
     return err;
 }
 
+void android_notify_init(){
+    ensure_comm_connected();
+    (*jni_tl.env)->CallStaticVoidMethod(jni_tl.env, jni.glfw_class, jni.method_receiveInit);
+}
+
 
 JNIEXPORT void JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSurfaceCreated(JNIEnv *env, jclass clazz,
@@ -1437,9 +1430,8 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSurfaceDestroyed(JNIEnv *env,
 JNIEXPORT void JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_sendMousePosition0__DD(JNIEnv *env, jclass clazz,
                                                           jdouble v1, jdouble v2) {
-    if(cursor_unscaled.x == v1 && cursor_unscaled.y == v2) return;
-    cursor_unscaled.x = v1;
-    cursor_unscaled.y = v2;
+    _glfw.android.xcursor = v1;
+    _glfw.android.ycursor = v2;
     update_flags |= FLAG_MOUSE_POS;
     _input_queue_wait_unlock(&input_queue);
 }
@@ -1455,6 +1447,7 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_initialize(JNIEnv *env, jclass clazz) {
     jni.method_getClipboardString = (*env)->GetStaticMethodID(env, clazz, "getClipboardString", "()Ljava/lang/String;");
     jni.method_setClipboardString = (*env)->GetStaticMethodID(env, clazz, "setClipboardString", "(Ljava/lang/String;)V");
     jni.method_enableDirectGamepad = (*env)->GetStaticMethodID(env, clazz, "enableDirectGamepad", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)V");
+    jni.method_receiveInit = (*env)->GetStaticMethodID(env, clazz, "receiveInit", "()V");
 }
 
 JNIEXPORT void JNICALL
@@ -1471,11 +1464,11 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_sendKeyEvent(JNIEnv *env, jclass clazz, 
     android_send_event(&event);
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_git_artdeell_dnbootstrap_glfw_GLFW_sendRawKeyEvent(JNIEnv *env, jclass clazz,
                                                         jint android_code, jint state, jint mods, jchar codepoint) {
     int glfw_key = translate_android_key(android_code);
-    if(glfw_key == -1) return;
+    if(glfw_key == -1) return false;
     input_event_t event = {
             .type = GLFW_ANDROID_EVENT_TYPE_KEYBOARD_KEY,
             .k.glfw_code = glfw_key,
@@ -1485,6 +1478,7 @@ Java_git_artdeell_dnbootstrap_glfw_GLFW_sendRawKeyEvent(JNIEnv *env, jclass claz
             .k.codepoint = codepoint
     };
     android_send_event(&event);
+    return true;
 }
 
 JNIEXPORT void JNICALL
@@ -1531,4 +1525,22 @@ void _glfwSendJoystickConnectEvent(void) {
             .type = GLFW_ANDROID_EVENT_TYPE_JOYSTICK_STATE
     };
     android_send_event(&event);
+}
+
+JNIEXPORT void JNICALL
+Java_git_artdeell_dnbootstrap_glfw_GLFW_nativeSetWindowAttribs(JNIEnv *env, jclass clazz,
+                                                               jint attrib, jboolean value) {
+    if(!surfaceOwner) return;
+    switch(attrib){
+        case GLFW_HOVERED:
+            surfaceOwner->android.hovered = value ? GLFW_TRUE : GLFW_FALSE;
+            break;
+        case GLFW_VISIBLE:
+            if(value) _glfwShowWindowAndroid(surfaceOwner);
+            else _glfwHideWindowAndroid(surfaceOwner);
+            break;
+        default:
+            _glfwInputError(GLFW_INVALID_ENUM, "Unsupported window attribute");
+            break;
+    }
 }

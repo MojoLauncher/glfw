@@ -181,7 +181,10 @@ if (GLFW_BUILD_WAYLAND)
 endif()
 
 if (GLFW_BUILD_ANDROID)
-    target_link_libraries(glfw PRIVATE android log)
+    if (NOT TARGET mojoexec)
+        message(FATAL_ERROR "MojoExec is a required dependency! Make sure you have added it beforeincluding this")
+    endif ()
+    target_link_libraries(glfw PRIVATE android log mojoexec)
 endif ()
 
 if (GLFW_BUILD_X11)

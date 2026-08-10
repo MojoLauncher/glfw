@@ -8,13 +8,6 @@ android {
 
     defaultConfig {
         minSdk 21
-        externalNativeBuild {
-            cmake {
-                arguments "-DGLFW_BUILD_WAYLAND=OFF", "-DGLFW_BUILD_X11=OFF", "-DGLFW_BUILD_ANDROID=ON",
-                        "-DGLFW_BUILD_EXAMPLES=OFF", "-DGLFW_BUILD_TESTS=OFF", "-DGLFW_INSTALL=OFF", "-DBUILD_SHARED_LIBS=ON"
-                cFlags "-Wno-nullability-completeness"
-            }
-        }
     }
 
     buildTypes {
@@ -37,14 +30,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-
-    externalNativeBuild {
-        cmake {
-            path file('../CMakeLists.txt')
-        }
-    }
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation-jvm:1.9.1'
+    implementation 'androidx.annotation:annotation-jvm:1.10.0'
+    api project(":mojoexec:jni_bindings")
 }

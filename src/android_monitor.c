@@ -30,18 +30,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <mojoexec.h>
 
 // The the sole (fake) video mode of our (sole) fake monitor
 //
 static GLFWvidmode getVideoMode(void)
 {
     GLFWvidmode mode;
-    mode.width = _glfw.android.renderspec->disp_width;
-    mode.height = _glfw.android.renderspec->disp_height;
+    mode.width = mojoexec_renderspec.disp_width;
+    mode.height = mojoexec_renderspec.disp_height;
     mode.redBits = 8;
     mode.greenBits = 8;
     mode.blueBits = 8;
-    mode.refreshRate = _glfw.android.renderspec->disp_hz;
+    mode.refreshRate = (int) mojoexec_renderspec.disp_hz;
     return mode;
 }
 
