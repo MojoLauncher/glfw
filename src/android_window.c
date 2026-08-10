@@ -1091,15 +1091,111 @@ GLFWbool _glfwSwapBuffersAttentionEglAndroid(_GLFWwindow* window) {
 
 const char* _glfwGetScancodeNameAndroid(int scancode)
 {
-    if (scancode > AKEYCODE_MACRO_4)
-    {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode %i", scancode);
-        return NULL;
+    switch (scancode) {
+        case AKEYCODE_SPACE: return "Space";
+        case AKEYCODE_APOSTROPHE: return "'";
+        case AKEYCODE_COMMA: return ",";
+        case AKEYCODE_MINUS: return "-";
+        case AKEYCODE_PERIOD: return ".";
+        case AKEYCODE_SLASH: return "/";
+        case AKEYCODE_0: return "0";
+        case AKEYCODE_1: return "1";
+        case AKEYCODE_2: return "2";
+        case AKEYCODE_3: return "3";
+        case AKEYCODE_4: return "4";
+        case AKEYCODE_5: return "5";
+        case AKEYCODE_6: return "6";
+        case AKEYCODE_7: return "7";
+        case AKEYCODE_8: return "8";
+        case AKEYCODE_9: return "9";
+        case AKEYCODE_SEMICOLON: return ";";
+        case AKEYCODE_EQUALS: return "=";
+        case AKEYCODE_A: return "A";
+        case AKEYCODE_B: return "B";
+        case AKEYCODE_C: return "C";
+        case AKEYCODE_D: return "D";
+        case AKEYCODE_E: return "E";
+        case AKEYCODE_F: return "F";
+        case AKEYCODE_G: return "G";
+        case AKEYCODE_H: return "H";
+        case AKEYCODE_I: return "I";
+        case AKEYCODE_J: return "J";
+        case AKEYCODE_K: return "K";
+        case AKEYCODE_L: return "L";
+        case AKEYCODE_M: return "M";
+        case AKEYCODE_N: return "N";
+        case AKEYCODE_O: return "O";
+        case AKEYCODE_P: return "P";
+        case AKEYCODE_Q: return "Q";
+        case AKEYCODE_R: return "R";
+        case AKEYCODE_S: return "S";
+        case AKEYCODE_T: return "T";
+        case AKEYCODE_U: return "U";
+        case AKEYCODE_V: return "V";
+        case AKEYCODE_W: return "W";
+        case AKEYCODE_X: return "X";
+        case AKEYCODE_Y: return "Y";
+        case AKEYCODE_Z: return "Z";
+        case AKEYCODE_LEFT_BRACKET: return "[";
+        case AKEYCODE_BACKSLASH: return "\\";
+        case AKEYCODE_RIGHT_BRACKET: return "]";
+        case AKEYCODE_GRAVE: return "`";
+        case AKEYCODE_ESCAPE: return "ESC";
+        case AKEYCODE_ENTER: return "Enter";
+        case AKEYCODE_TAB: return "Tab";
+        case AKEYCODE_DEL: return "Backspace";
+        case AKEYCODE_INSERT: return "Insert";
+        case AKEYCODE_FORWARD_DEL: return "Delete";
+        case AKEYCODE_DPAD_RIGHT: return "Right";
+        case AKEYCODE_DPAD_LEFT: return "Left";
+        case AKEYCODE_DPAD_UP: return "Up";
+        case AKEYCODE_DPAD_DOWN: return "Down";
+        case AKEYCODE_PAGE_UP: return "PageUp";
+        case AKEYCODE_PAGE_DOWN: return "PageDown";
+        case AKEYCODE_MOVE_HOME: return "Home";
+        case AKEYCODE_MOVE_END: return "End";
+        case AKEYCODE_CAPS_LOCK: return "CapsLock";
+        case AKEYCODE_SCROLL_LOCK: return "ScrollLock";
+        case AKEYCODE_NUM_LOCK: return "NumLock";
+        case AKEYCODE_SYSRQ: return "PrintScreen";
+        case AKEYCODE_BREAK: return "Pause";
+        case AKEYCODE_F1: return "F1";
+        case AKEYCODE_F2: return "F2";
+        case AKEYCODE_F3: return "F3";
+        case AKEYCODE_F4: return "F4";
+        case AKEYCODE_F5: return "F5";
+        case AKEYCODE_F6: return "F6";
+        case AKEYCODE_F7: return "F7";
+        case AKEYCODE_F8: return "F8";
+        case AKEYCODE_F9: return "F9";
+        case AKEYCODE_F10: return "F10";
+        case AKEYCODE_F11: return "F11";
+        case AKEYCODE_F12: return "F12";
+        case AKEYCODE_NUMPAD_0: return "0";
+        case AKEYCODE_NUMPAD_1: return "1";
+        case AKEYCODE_NUMPAD_2: return "2";
+        case AKEYCODE_NUMPAD_3: return "3";
+        case AKEYCODE_NUMPAD_4: return "4";
+        case AKEYCODE_NUMPAD_5: return "5";
+        case AKEYCODE_NUMPAD_6: return "6";
+        case AKEYCODE_NUMPAD_7: return "7";
+        case AKEYCODE_NUMPAD_8: return "8";
+        case AKEYCODE_NUMPAD_9: return "9";
+        case AKEYCODE_NUMPAD_DOT: return ".";
+        case AKEYCODE_NUMPAD_DIVIDE: return "/";
+        case AKEYCODE_NUMPAD_SUBTRACT: return "-";
+        case AKEYCODE_NUMPAD_ADD: return "+";
+        case AKEYCODE_NUMPAD_ENTER: return "Enter";
+        case AKEYCODE_NUMPAD_EQUALS: return "=";
+        case AKEYCODE_SHIFT_LEFT: return "Shift";
+        case AKEYCODE_CTRL_LEFT: return "Control";
+        case AKEYCODE_ALT_LEFT: return "Alt";
+        case AKEYCODE_SHIFT_RIGHT: return "RShift";
+        case AKEYCODE_CTRL_RIGHT: return "RControl";
+        case AKEYCODE_ALT_RIGHT: return "Alt-R";
+        default:
+            return NULL;
     }
-
-    // TODO: query KeyCharacterMap for the keycode display labels
-
-    return NULL;
 }
 
 int _glfwGetKeyScancodeAndroid(int key)
