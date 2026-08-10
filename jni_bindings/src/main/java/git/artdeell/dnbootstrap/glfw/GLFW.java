@@ -110,6 +110,7 @@ public class GLFW {
     public static void receiveInit() {
         onInitCallback.run();
     }
+
     public static native void initialize();
     public static native void sendMousePosition0(double x, double y);
     public static native void sendKeyEvent(int glfwCode, int state, int mods);
