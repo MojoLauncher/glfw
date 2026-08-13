@@ -53,7 +53,7 @@ endif()
 
 if (GLFW_BUILD_ANDROID)
     target_compile_definitions(glfw PRIVATE _GLFW_ANDROID)
-    target_sources(glfw PRIVATE android_platform.h android_joystick.h android_init.c android_joystick.c android_monitor.c android_window.c android_window_hook.c android_input_queue.c)
+    target_sources(glfw PRIVATE android_platform.h android_joystick.h android_init.c android_joystick.c android_monitor.c android_window.c android_input_queue.c)
 endif()
 
 if (GLFW_BUILD_WAYLAND)
