@@ -1363,7 +1363,7 @@ VkResult _glfwCreateWindowSurfaceAndroid(VkInstance instance,
         pthread_mutex_unlock(&nw_vulkan_mutex);
     }
 
-    _glfwDisablePrerotationAndroid(nativeWindow);
+    mojoexec_override_pretransform(nativeWindow);
 
     memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
