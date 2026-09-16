@@ -263,6 +263,7 @@ static void makeContextCurrentEGL(_GLFWwindow* window)
                             getEGLErrorString(eglGetError()));
             return;
         }
+        mojoexec_make_bigcore_affine();
 
 #if defined(_GLFW_WAYLAND)
         // NOTE: Disable EGL vsync so we can substitute our own that includes a timeout
