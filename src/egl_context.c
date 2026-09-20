@@ -263,7 +263,9 @@ static void makeContextCurrentEGL(_GLFWwindow* window)
                             getEGLErrorString(eglGetError()));
             return;
         }
+#if defined(_GLFW_ANDROID)
         mojoexec_make_bigcore_affine();
+#endif
 
 #if defined(_GLFW_WAYLAND)
         // NOTE: Disable EGL vsync so we can substitute our own that includes a timeout
