@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mojoexec.h>
+#include <dlfcn.h>
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -128,7 +129,7 @@ extern void android_notify_init();
 
 void* _glfwLoadVulkanDriverAndroid(void) {
 
-    return mojoexec_acq_vulkan_handle();
+    return dlopen("libmojoexec.so", RTLD_NOLOAD | RTLD_NOW);
 }
 
 void* _glfwLoadEglAndroid(void) {
